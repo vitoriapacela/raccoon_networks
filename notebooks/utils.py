@@ -214,3 +214,37 @@ def comm(g, num_iter=1):
             gn_dict_communities[node] = -1
 
     return gn_dict_communities
+
+def cluster_score_comm(g, X, i):
+    """Calculates the silhouette score for all the possible communities
+    
+    Input:  Graph object g
+            Distance matrix X
+            Number of iterations i
+           
+    Output: List with the silhouette scores"""
+    l = np.array(list(comm(g, i).values()))
+    if l[-1]==len(g):
+        l[-1]=len(g) - 1
+    s = silhouette_score(X, l, metric="precomputed")
+    return s
+
+def comm_auto(g, X):
+    """Calculates the silhouette score for all iterations of the Girvan-Newman algorithm
+    
+    Input:  Graph object g
+            Distance matrix X
+           
+    Output: Dict with labels of the cluster with the best score
+            List with the silhouette scores"""
+    n = 0
+    i = 1
+    max_score = -1
+    while n<len(g):
+        score = cluster_score_comm(g, X, i)
+        if score>max_score:
+            max_i = i
+            max_score = score
+        n = max(comm(g, i).values())
+        i +=1
+    return comm(g, max_i)
