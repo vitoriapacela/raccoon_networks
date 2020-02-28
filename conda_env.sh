@@ -11,6 +11,7 @@ conda install -c anaconda seaborn -y
 conda install -c conda-forge glob2 -y
 conda install -c anaconda networkx -y
 conda install -c plotly plotly -y
+conda install seaborn -y
 
 # the following is needed to display plotly plots in jupyter lab
 # source: https://github.com/plotly/plotly.py#jupyterlab-support-python-35
