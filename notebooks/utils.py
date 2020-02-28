@@ -119,6 +119,11 @@ def create_nodes(G, pos):
 
 ## K-means
 def preprocess(g):
+    """ Filters the desired nodes, creates adjacency matrix based on the interaction time metric.
+    
+    Input: g (graph object)
+    Output: Interaction matrix X (numpy matrix)
+    """
     # Filtering: remove edges > 15
     remove = [node for node in g.nodes if int(node) > 15]
     g.remove_nodes_from(remove)
@@ -132,6 +137,10 @@ def preprocess(g):
 
 
 def plot_spring(g, labels):
+    """ Plots graph in spring layout.
+    Input: g (graph object)
+           labels (list of cluster IDs)
+    """
     plt.figure()
     ax1 = plt.subplot(111)
 
@@ -145,6 +154,15 @@ def plot_spring(g, labels):
     plt.show()
 
 def km_cluster_score(X, g):
+    """
+    Calculates the silhouette score for all the possible k clusters defined in K-Means Clustering.
+
+    Input:  Graph object g
+            Distance matrix X
+
+    Output: Dict with labels of the cluster with the best score
+            List with the silhouette scores
+    """
     scores = []
     labels = []
     for i in range(2, len(X)):
@@ -157,9 +175,19 @@ def km_cluster_score(X, g):
     idx = np.argmax(scores)
     clust_lab = {list(g.nodes())[i]: list(labels[idx])[i] for i in range(len(labels[idx]))}
     return clust_lab, scores
-    # return clust_lab, np.asarray(scores)
 
 def km_cluster_score_full(X, g):
+    """
+    Calculates the silhouette score for all the possible k clusters defined in K-Means Clustering. Plots the clusters for every week iteration.
+    
+    Input:  Graph object g
+            Distance matrix X
+            
+    Output: List of the clusters with best score
+            List with the best silhouette scores
+            Numpy array with all the silhouette scores for all the weeks
+            Numpy array with all the clusters for all the weeks
+    """
     scores = []
     labels = []
     for i in range(2, len(X)):
@@ -190,16 +218,29 @@ def weight(G, node):
 
 ## Communities
 def mve(G):
+    """
+    Finds the Most Valuable Edge.
+    
+    Input:  Graph object G
+    Output: List with the most valuable edge's node and weight.
+    """
     # assume that the graph is already filtered
     mx = 0 
     for n in G.nodes():
         for w in G[n]:
-            if G[n][w]['weight']>mx:
+            if G[n][w]['weight'] > mx:
                 mx = G[n][w]['weight']
-                edge = (n , w)
+                edge = (n, w)
     return edge
 
 def comm(g, num_iter=1):
+    """
+    Community clustering with Girvan-Newman's algorithm.
+    
+    Input:  Graph object g
+            (int) Number of iterations num_iter
+    Output: Dict with cluster labels
+    """
     gn_generator = girvan_newman(g, mve)
     gn_communities = next(islice(gn_generator, num_iter, None))
 
