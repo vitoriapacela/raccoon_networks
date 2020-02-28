@@ -81,11 +81,12 @@ def create_edges(G, pos):
     return edge_trace
 
 
-def create_nodes(G, pos):
+def create_nodes(G, pos, cluster_score):
     """Creates a trace with the nodes of a graph
 
     Input:  Graph object G
             Positional dict pos
+            Function cluster_score (hc_cluster_score, km_cluster_score, or cluster_score_comm)
 
     Output: Trace of nodes with color given by cluster_label """
     node_x = [-1]
@@ -211,9 +212,9 @@ def weight(G, node):
 
     Output: Corrected log(s + 1) of interaction"""
     s = 0
+    # assume G is already filtered
     for g in G[node]:
-        if g in filt:
-            s += G[node][g]['weight']
+        s += G[node][g]['weight']
     return np.log(s + 1)
 
 ## Communities
@@ -289,3 +290,49 @@ def comm_auto(g, X):
         n = max(comm(g, i).values())
         i +=1
     return comm(g, max_i)
+
+def create_nodes_weight(G, pos):
+    """Creates a trace with the nodes of a graph
+    
+    Input:  Graph object G
+            Positional dict pos
+           
+    Output: Trace of nodes with color given by 'weight' """
+    node_x = []
+    node_y = []
+    for p in pos.values():
+        x, y = p
+        node_x.append(x)
+        node_y.append(y)
+
+    node_trace = go.Scatter(
+        x=node_x, y=node_y,
+        mode='markers',
+        hoverinfo='text',
+        marker=dict(
+            showscale=True,
+            colorscale='YlGnBu',
+            reversescale=True,
+            color=[],
+            size=20,
+            colorbar=dict(
+                thickness=15,
+                title='Node Connections',
+                xanchor='left',
+                titleside='right'
+            ),
+            line_width=2))
+
+    node_adjacencies = []
+    node_text = []
+    for k in pos.keys():
+        if k in G.nodes:
+            node_adjacencies.append(weight(G, k))
+            node_text.append('Log-Interaction: '+str(weight(G, k)))
+        else:
+            node_adjacencies.append(-1)
+            node_text.append('Log-Interaction: NA')
+
+    node_trace.marker.color = node_adjacencies
+    node_trace.text = node_text
+    return node_trace
